@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: git@github.com:adiforstudy/cloud-native-platform.git
     targetRevision: main
-    path: k8s
+    path: k8s/base
 
   destination:
     server: https://kubernetes.default.svc
