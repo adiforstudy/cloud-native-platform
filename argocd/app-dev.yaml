@@ -9,7 +9,10 @@ spec:
   source:
     repoURL: git@github.com:adiforstudy/cloud-native-platform.git
     targetRevision: main
-    path: k8s/base
+    path: charts/api
+    helm:
+      valueFiles:
+        - values.yaml
 
   destination:
     server: https://kubernetes.default.svc
