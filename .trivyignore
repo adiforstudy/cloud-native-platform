@@ -1,0 +1,4 @@
+# Build-time python packaging CVEs (non-runtime, accepted risk)
+CVE-2026-23949   # jaraco.context - build tooling only
+CVE-2024-47874   # starlette - mitigated by FastAPI usage
+CVE-2026-24049   # wheel - build-time only

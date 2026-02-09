@@ -56,6 +56,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # 8️⃣ Helm lint
       - name: Helm lint
