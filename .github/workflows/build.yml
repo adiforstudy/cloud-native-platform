@@ -3,6 +3,8 @@ name: CI - Build, Scan, Lint, Push
 on:
   push:
     branches: ["main"]
+    tags:
+      - "v*.*.*"
 
 jobs:
   build:
@@ -46,8 +48,9 @@ jobs:
           context: .
           file: docker/Dockerfile
           load: true
-          tags: ghcr.io/adiforstudy/cloud-native-platform:latest
-
+          tags: |
+            ghcr.io/adiforstudy/cloud-native-platform:latest
+            ghcr.io/adiforstudy/cloud-native-platform:${{ github.ref_name }}
       # 7️⃣ Scan image with Trivy
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@0.20.0
@@ -70,4 +73,6 @@ jobs:
           file: docker/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/adiforstudy/cloud-native-platform:latest
+          tags: |
+            ghcr.io/adiforstudy/cloud-native-platform:latest
+            ghcr.io/adiforstudy/cloud-native-platform:${{ github.ref_name }}
