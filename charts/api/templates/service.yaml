@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   selector:
-    app: {{ .Release.Name }}
+    app: {{ include "api.name" . }}
   ports:
     - port: 80
       targetPort: 8000
