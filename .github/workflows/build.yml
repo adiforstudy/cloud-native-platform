@@ -3,15 +3,13 @@ name: CI - Build, Scan, Lint, Push
 on:
   push:
     branches: ["main"]
-    tags:
-      - "v*.*.*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -19,13 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Lint Dockerfile (Hadolint)
+      # 2️⃣ Lint Dockerfile
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: docker/Dockerfile
 
-      # 3️⃣ Setup QEMU (for multi-arch)
+      # 3️⃣ Setup QEMU
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -34,15 +32,19 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # 5️⃣ Login to GHCR
-      - name: Login to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 6️⃣ Build image locally (needed for Trivy scan)
-      - name: Build image (local, no push)
+      # 6️⃣ Get version from VERSION file
+      - name: Get version
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
+      # 7️⃣ Build image locally (for scanning)
+      - name: Build image (local)
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -50,8 +52,9 @@ jobs:
           load: true
           tags: |
             ghcr.io/adiforstudy/cloud-native-platform:latest
-            ghcr.io/adiforstudy/cloud-native-platform:${{ github.ref_name }}
-      # 7️⃣ Scan image with Trivy
+            ghcr.io/adiforstudy/cloud-native-platform:${{ env.VERSION }}
+
+      # 8️⃣ Trivy scan
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@0.20.0
         with:
@@ -61,11 +64,11 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore
 
-      # 8️⃣ Helm lint
+      # 9️⃣ Helm lint
       - name: Helm lint
         run: helm lint charts/api
 
-      # 9️⃣ Build & push multi-arch image (only if everything passed)
+      # 🔟 Build & push multi-arch image
       - name: Build and push image (multi-arch)
         uses: docker/build-push-action@v5
         with:
@@ -75,4 +78,17 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/adiforstudy/cloud-native-platform:latest
-            ghcr.io/adiforstudy/cloud-native-platform:${{ github.ref_name }}
+            ghcr.io/adiforstudy/cloud-native-platform:${{ env.VERSION }}
+
+      # 1️⃣1️⃣ Auto-promote to dev
+      - name: Update dev environment
+        run: |
+          sed -i "s/tag:.*/tag: v$VERSION/" environments/dev/values.yaml
+
+      - name: Commit dev promotion
+        run: |
+          git config user.name "github-actions"
+          git config user.email "ci@github.com"
+          git add environments/dev/values.yaml
+          git commit -m "ci: promote v$VERSION to dev" || echo "No changes"
+          git push
