@@ -16,6 +16,8 @@ jobs:
       # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 2️⃣ Lint Dockerfile
       - name: Lint Dockerfile
@@ -83,7 +85,7 @@ jobs:
       # 1️⃣1️⃣ Auto-promote to dev
       - name: Update dev environment
         run: |
-          sed -i "s/tag:.*/tag: v$VERSION/" environments/dev/values.yaml
+          sed -i "s/^[[:space:]]*tag:.*/  tag: v$VERSION/" environments/dev/values.yaml
 
       - name: Commit dev promotion
         run: |
