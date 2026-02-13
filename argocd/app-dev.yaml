@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:adiforstudy/cloud-native-platform.git
+    repoURL: https://github.com/adiforstudy/cloud-native-platform.git
     targetRevision: main
     path: charts/api
     helm:
