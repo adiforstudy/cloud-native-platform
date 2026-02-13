@@ -1,0 +1,37 @@
+name: Promote Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to promote (example: 0.1.3)"
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Promote to Stage
+        run: |
+          sed -i "s/^[[:space:]]*tag:.*/  tag: v${{ inputs.version }}/" environments/stage/values.yaml
+
+      - name: Promote to Prod
+        run: |
+          sed -i "s/^[[:space:]]*tag:.*/  tag: v${{ inputs.version }}/" environments/prod/values.yaml
+
+      - name: Commit promotion
+        run: |
+          git config user.name "github-actions"
+          git config user.email "ci@github.com"
+          git add environments/stage/values.yaml environments/prod/values.yaml
+          git commit -m "release: promote v${{ inputs.version }} to stage and prod"
+          git push
