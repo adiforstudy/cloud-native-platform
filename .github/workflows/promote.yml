@@ -9,6 +9,9 @@ on:
 
 jobs:
   promote:
+    concurrency:
+      group: cd-main
+      cancel-in-progress: false
     runs-on: ubuntu-latest
 
     permissions:
@@ -27,6 +30,9 @@ jobs:
       - name: Promote to Prod
         run: |
           sed -i "s/^[[:space:]]*tag:.*/  tag: v${{ inputs.version }}/" environments/prod/values.yaml
+
+      - name: Pull latest
+        run: git pull --rebase origin main
 
       - name: Commit promotion
         run: |

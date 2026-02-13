@@ -6,6 +6,9 @@ on:
 
 jobs:
   build:
+    concurrency:
+      group: cd-main
+      cancel-in-progress: false
     runs-on: ubuntu-latest
 
     permissions:
@@ -86,6 +89,9 @@ jobs:
       - name: Update dev environment
         run: |
           sed -i "s/^[[:space:]]*tag:.*/  tag: v$VERSION/" environments/dev/values.yaml
+
+      - name: Pull latest
+        run: git pull --rebase origin main
 
       - name: Commit dev promotion
         run: |
