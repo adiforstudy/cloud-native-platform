@@ -1,0 +1,37 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to rollback to (ex: v0.1.1)"
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git pull --rebase origin main
+
+      - name: Rollback prod
+        run: |
+          sed -i "s/^[[:space:]]*tag:.*/  tag: ${{ github.event.inputs.version }}/" environments/prod/values.yaml
+
+      - name: Commit rollback
+        run: |
+          git add environments/prod/values.yaml
+          git commit -m "rollback: revert prod to ${{ github.event.inputs.version }}"
+          git push
