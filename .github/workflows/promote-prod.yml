@@ -1,0 +1,28 @@
+name: Promote to Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git pull --rebase origin main
+
+      - name: Promote to prod
+        run: |
+          chmod +x scripts/promote-prod.sh
+          ./scripts/promote-prod.sh
