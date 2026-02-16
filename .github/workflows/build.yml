@@ -22,6 +22,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Sync main branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git pull --rebase origin main
+
       # 2️⃣ Lint Dockerfile
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
