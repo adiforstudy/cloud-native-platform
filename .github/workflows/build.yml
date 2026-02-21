@@ -3,6 +3,8 @@ name: CI - Build, Scan, Lint, Push
 on:
   push:
     branches: ["main"]
+    tags:
+      - "v*.*.*"
 
 concurrency:
   group: cd-main
@@ -52,9 +54,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7️⃣ Get version from VERSION file
-      - name: Get version
-        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "VERSION=dev-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          fi
 
       # 8️⃣ Build image locally (for security scan)
       - name: Build image (local)
