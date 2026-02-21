@@ -22,7 +22,12 @@ jobs:
           git config user.email "github-actions@github.com"
           git pull --rebase origin main
 
+      - name: Set version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Promote to prod
         run: |
           chmod +x scripts/promote-prod.sh
-          ./scripts/promote-prod.sh
+          ./scripts/promote-prod.sh $VERSION
