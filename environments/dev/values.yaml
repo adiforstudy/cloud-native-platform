@@ -1,5 +1,5 @@
 image:
-  tag: dev-f501830
+  tag: dev-9627627
   repository: ghcr.io/adiforstudy/cloud-native-platform
 
 replicaCount: 1
