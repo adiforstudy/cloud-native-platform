@@ -1,5 +1,5 @@
 image:
-  tag: 0.1.2
+  tag: dev-d626fb4
   repository: ghcr.io/adiforstudy/cloud-native-platform
 
 replicaCount: 1
